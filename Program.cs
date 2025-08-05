@@ -1,7 +1,15 @@
+using Microsoft.EntityFrameworkCore; // Ensure this using directive is present
+using Microsoft.Extensions.DependencyInjection; // Add this using directive for AddDbContext
+using PalcoLivre.Data; // Adjust namespace as needed
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+// Register DbContext with Azure SQL connection string
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
