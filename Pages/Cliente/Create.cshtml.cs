@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using PalcoLivre.Data;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PalcoLivre.Pages.Cliente
 {
@@ -23,14 +25,18 @@ namespace PalcoLivre.Pages.Cliente
         [EmailAddress(ErrorMessage = "Email inválido.")]
         public required string Email { get; set; }
 
+        public List<Data.Cliente> Clientes { get; set; } = new();
+
         public void OnGet()
         {
+            Clientes = _context.Clientes.ToList();
         }
 
         public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
             {
+                Clientes = _context.Clientes.ToList();
                 return Page();
             }
 
@@ -43,7 +49,8 @@ namespace PalcoLivre.Pages.Cliente
             _context.Clientes.Add(cliente);
             _context.SaveChanges();
 
-            return RedirectToPage("/Index");
+            TempData["ShowConfirmation"] = "true";
+            return RedirectToPage("/Cliente/Create");
         }
     }
 }

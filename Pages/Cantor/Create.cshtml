@@ -20,6 +20,15 @@
     <button type="submit" class="btn btn-primary">Create</button>
 </form>
 
+@if (TempData["ShowConfirmation"] as string == "true")
+{
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            window.showConfirmationModal('The record was saved successfully!');
+        });
+    </script>
+}
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

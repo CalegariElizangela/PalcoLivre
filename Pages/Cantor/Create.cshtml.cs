@@ -34,7 +34,7 @@ namespace PalcoLivre.Pages.Cantor
                 return Page();
             }
 
-            var cantor = new Data.Cantor
+            var cantor = new PalcoLivre.Data.Cantor
             {
                 Nome = Nome,
                 Telefone = Telefone
@@ -43,7 +43,8 @@ namespace PalcoLivre.Pages.Cantor
             _context.Cantores.Add(cantor);
             _context.SaveChanges();
 
-            return RedirectToPage("/Index");
+            TempData["ShowConfirmation"] = "true";
+            return RedirectToPage("/Cantor/Create");
         }
     }
 }

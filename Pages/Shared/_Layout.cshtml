@@ -53,5 +53,34 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background: #e0f7fa;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmationModalLabel">Success</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="confirmationModalBody">
+        The record was saved successfully!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.showConfirmationModal = function(message) {
+    var modalBody = document.getElementById('confirmationModalBody');
+    if (modalBody && message) {
+      modalBody.textContent = message;
+    }
+    var modal = new bootstrap.Modal(document.getElementById('confirmationModal'));
+    modal.show();
+  };
+</script>
 </body>
 </html>
