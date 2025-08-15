@@ -18,14 +18,14 @@ namespace PalcoLivre.Pages.Cliente
 
         [BindProperty]
         [Required(ErrorMessage = "Nome é obrigatório.")]
-        public required string Nome { get; set; }
+        public string Nome { get; set; } = string.Empty;
 
         [BindProperty]
         [Required(ErrorMessage = "Email é obrigatório.")]
         [EmailAddress(ErrorMessage = "Email inválido.")]
-        public required string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
-        public List<Data.Cliente> Clientes { get; set; } = new();
+        public List<PalcoLivre.Data.Cliente> Clientes { get; set; } = new();
 
         public void OnGet()
         {
@@ -40,7 +40,7 @@ namespace PalcoLivre.Pages.Cliente
                 return Page();
             }
 
-            var cliente = new Data.Cliente
+            var cliente = new PalcoLivre.Data.Cliente
             {
                 Nome = Nome,
                 Email = Email
