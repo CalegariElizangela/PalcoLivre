@@ -17,9 +17,16 @@ namespace PalcoLivre.Pages.Agendamento
         }
 
         [BindProperty]
+        public int Id { get; set; }
+
+        [BindProperty]
         [Required(ErrorMessage = "A data do evento é obrigatória.")]
         [DataType(DataType.Date)]
         public DateTime? DataEvento { get; set; }
+
+        [BindProperty]
+        [Required(ErrorMessage = "O período é obrigatório.")]
+        public string? Periodo { get; set; }
 
         [BindProperty]
         [Required(ErrorMessage = "A hora inicial é obrigatória.")]
@@ -30,10 +37,6 @@ namespace PalcoLivre.Pages.Agendamento
         [Required(ErrorMessage = "A hora final é obrigatória.")]
         [DataType(DataType.Time)]
         public TimeSpan? HoraFinal { get; set; }
-
-        [BindProperty]
-        [Required(ErrorMessage = "O período é obrigatório.")]
-        public string? Periodo { get; set; }
 
         [BindProperty]
         [Required(ErrorMessage = "A descrição é obrigatória.")]
@@ -59,17 +62,34 @@ namespace PalcoLivre.Pages.Agendamento
                 OnGet();
                 return Page();
             }
-            var agendamento = new Data.Agendamento
+            if (Id > 0)
             {
-                DataEvento = DataEvento ?? DateTime.Today,
-                HoraInicial = HoraInicial ?? TimeSpan.Zero,
-                HoraFinal = HoraFinal ?? TimeSpan.Zero,
-                Periodo = Periodo ?? string.Empty,
-                Descricao = Descricao ?? string.Empty
-            };
-            _context.Agendamentos.Add(agendamento);
-            _context.SaveChanges();
-            TempData["ShowConfirmation"] = "true";
+                var agendamento = _context.Agendamentos.FirstOrDefault(a => a.Id == Id);
+                if (agendamento != null)
+                {
+                    agendamento.DataEvento = DataEvento ?? DateTime.Today;
+                    agendamento.HoraInicial = HoraInicial ?? TimeSpan.Zero;
+                    agendamento.HoraFinal = HoraFinal ?? TimeSpan.Zero;
+                    agendamento.Periodo = Periodo ?? string.Empty;
+                    agendamento.Descricao = Descricao ?? string.Empty;
+                    _context.SaveChanges();
+                    TempData["ShowConfirmation"] = "true";
+                }
+            }
+            else
+            {
+                var agendamento = new Data.Agendamento
+                {
+                    DataEvento = DataEvento ?? DateTime.Today,
+                    HoraInicial = HoraInicial ?? TimeSpan.Zero,
+                    HoraFinal = HoraFinal ?? TimeSpan.Zero,
+                    Periodo = Periodo ?? string.Empty,
+                    Descricao = Descricao ?? string.Empty
+                };
+                _context.Agendamentos.Add(agendamento);
+                _context.SaveChanges();
+                TempData["ShowConfirmation"] = "true";
+            }
             return RedirectToPage("/Agendamento/Create");
         }
     }

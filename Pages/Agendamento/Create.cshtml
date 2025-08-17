@@ -3,11 +3,18 @@
 @{
     ViewData["Title"] = "Agendamento";
     var eventosJson = System.Text.Json.JsonSerializer.Serialize(Model.EventosMes.Select(e => new {
-        title = e.Descricao + " (" + e.Periodo + ")",
+        id = e.Id,
+        title = e.Periodo == "Bloquear" ? "Dia Bloqueado" : e.Descricao + " (" + e.Periodo + ")",
         start = e.DataEvento.ToString("yyyy-MM-dd") + "T" + e.HoraInicial.ToString(@"hh\:mm"),
         end = e.DataEvento.ToString("yyyy-MM-dd") + "T" + e.HoraFinal.ToString(@"hh\:mm"),
-        color = e.Periodo == "Manhã" ? "#4dd0e1" : e.Periodo == "Tarde" ? "#1976d2" : "#7e57c2",
-        extendedProps = new { periodo = e.Periodo }
+        color = e.Periodo == "Bloquear" ? "#d32f2f" : (e.Periodo == "Manhã" ? "#4dd0e1" : e.Periodo == "Tarde" ? "#1976d2" : "#7e57c2"),
+        extendedProps = new {
+            periodo = e.Periodo,
+            descricao = e.Descricao,
+            dataEvento = e.DataEvento.ToString("yyyy-MM-dd"),
+            horaInicial = e.HoraInicial.ToString(@"hh\:mm"),
+            horaFinal = e.HoraFinal.ToString(@"hh\:mm")
+        }
     }));
 }
 
@@ -16,49 +23,57 @@
 <div class="row justify-content-center">
     <div class="col-md-6">
         <form method="post" id="agendamentoForm">
-            <div class="mb-3">
-                <label for="dataEvento" class="form-label">Data do Evento</label>
-                <input type="date" class="form-control" id="dataEvento" name="DataEvento" asp-for="DataEvento" />
-                <span asp-validation-for="DataEvento" class="text-danger"></span>
+            <input type="hidden" id="agendamentoId" name="Id" value="" />
+            <div class="mb-3 d-flex align-items-end gap-2">
+                <div style="flex:1; min-width:120px;">
+                    <label for="dataEvento" class="form-label">Data do Evento</label>
+                    <input type="text" class="form-control" id="dataEvento" name="DataEvento" asp-for="DataEvento" placeholder="dd/MM/yyyy" maxlength="10" />
+                    <span asp-validation-for="DataEvento" class="text-danger"></span>
+                </div>
+                <div style="flex:2; min-width:200px;">
+                    <label for="descricao" class="form-label">Descrição do Evento</label>
+                    <input type="text" class="form-control" id="descricao" name="Descricao" asp-for="Descricao" />
+                    <span asp-validation-for="Descricao" class="text-danger"></span>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="horaInicial" class="form-label">Hora Inicial</label>
-                <input type="time" class="form-control" id="horaInicial" name="HoraInicial" asp-for="HoraInicial" />
-                <span asp-validation-for="HoraInicial" class="text-danger"></span>
+            <div class="mb-3 d-flex align-items-end gap-2">
+                <div style="flex:1;">
+                    <label for="periodo" class="form-label">Período</label>
+                    <select class="form-control" id="periodo" name="Periodo" asp-for="Periodo">
+                        <option value="">Selecione</option>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Noite">Noite</option>
+                        <option value="Bloquear">Bloquear</option>
+                    </select>
+                    <span asp-validation-for="Periodo" class="text-danger"></span>
+                </div>
+                <div style="flex:1;">
+                    <label for="horaInicial" class="form-label">Hora Inicial</label>
+                    <input type="time" class="form-control" id="horaInicial" name="HoraInicial" asp-for="HoraInicial" />
+                    <span asp-validation-for="HoraInicial" class="text-danger"></span>
+                </div>
+                <div style="flex:1;">
+                    <label for="horaFinal" class="form-label">Hora Final</label>
+                    <input type="time" class="form-control" id="horaFinal" name="HoraFinal" asp-for="HoraFinal" />
+                    <span asp-validation-for="HoraFinal" class="text-danger"></span>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="horaFinal" class="form-label">Hora Final</label>
-                <input type="time" class="form-control" id="horaFinal" name="HoraFinal" asp-for="HoraFinal" />
-                <span asp-validation-for="HoraFinal" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label for="periodo" class="form-label">Período</label>
-                <select class="form-control" id="periodo" name="Periodo" asp-for="Periodo">
-                    <option value="">Selecione</option>
-                    <option value="Manhã">Manhã</option>
-                    <option value="Tarde">Tarde</option>
-                    <option value="Noite">Noite</option>
-                </select>
-                <span asp-validation-for="Periodo" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label for="descricao" class="form-label">Descrição do Evento</label>
-                <input type="text" class="form-control" id="descricao" name="Descricao" asp-for="Descricao" />
-                <span asp-validation-for="Descricao" class="text-danger"></span>
-            </div>
-            <button type="submit" class="btn btn-primary">Agendar</button>
+            <button type="button" class="btn btn-secondary" id="btnNovo">Novo</button>
+            <button type="submit" class="btn btn-primary" id="btnAgendar">Agendar</button>
+            <button type="submit" class="btn btn-warning" id="btnAlterar" style="display:none;">Alterar</button>
         </form>
     </div>
 </div>
 
 <hr />
-<h3>Calendário de Eventos</h3>
 <div id="calendar"></div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/locales-all.global.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -67,9 +82,45 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 height: 600,
+                locale: 'pt-br',
                 events: eventos,
+                buttonText: {
+                    today: 'Hoje',
+                    month: 'Mês',
+                    week: 'Semana',
+                    day: 'Dia',
+                    list: 'Lista'
+                },
+                dateClick: function(info) {
+                    var date = info.date;
+                    var day = String(date.getDate()).padStart(2, '0');
+                    var month = String(date.getMonth() + 1).padStart(2, '0');
+                    var year = date.getFullYear();
+                    document.getElementById('dataEvento').value = day + '/' + month + '/' + year;
+                },
+                eventClick: function(info) {
+                    var props = info.event.extendedProps;
+                    var date = props.dataEvento;
+                    // Format value to dd/MM/yyyy
+                    if (date && date.includes('-')) {
+                        var d = date.split('-');
+                        date = d[2] + '/' + d[1] + '/' + d[0];
+                    }
+                    document.getElementById('agendamentoId').value = info.event.id;
+                    document.getElementById('dataEvento').value = date;
+                    document.getElementById('descricao').value = props.descricao;
+                    document.getElementById('periodo').value = props.periodo;
+                    document.getElementById('horaInicial').value = props.horaInicial;
+                    document.getElementById('horaFinal').value = props.horaFinal;
+                    document.getElementById('btnAgendar').style.display = 'none';
+                    document.getElementById('btnAlterar').style.display = '';
+                },
                 eventContent: function(arg) {
-                    // Add star icon to event
+                    if(arg.event.extendedProps.periodo === 'Bloquear') {
+                        return {
+                            html: `<span style='color:#d32f2f;'><i class='fas fa-times'></i></span> ` + arg.event.title
+                        };
+                    }
                     return {
                         html: `<span style='color:gold;'><i class='fas fa-star'></i></span> ` + arg.event.title
                     };
@@ -83,6 +134,66 @@
                 }
             });
             calendar.render();
+
+            // JS rule for Periodo and time fields
+            var periodoSelect = document.getElementById('periodo');
+            var horaInicialInput = document.getElementById('horaInicial');
+            var horaFinalInput = document.getElementById('horaFinal');
+
+            periodoSelect.addEventListener('change', function() {
+                if (periodoSelect.value === 'Manhã') {
+                    horaInicialInput.value = '08:00';
+                    horaFinalInput.value = '11:59';
+                } else if (periodoSelect.value === 'Tarde') {
+                    horaInicialInput.value = '12:00';
+                    horaFinalInput.value = '17:00';
+                } else if (periodoSelect.value === 'Noite') {
+                    horaInicialInput.value = '18:00';
+                    horaFinalInput.value = '23:59';
+                } else if (periodoSelect.value === 'Bloquear') {
+                    horaInicialInput.value = '00:00';
+                    horaFinalInput.value = '23:59';
+                } else {
+                    horaInicialInput.value = '';
+                    horaFinalInput.value = '';
+                }
+            });
+
+            function clearPeriodoIfCustomTime() {
+                var periodo = periodoSelect.value;
+                var hi = horaInicialInput.value;
+                var hf = horaFinalInput.value;
+                if (
+                    (periodo === 'Manhã' && (hi !== '08:00' || hf !== '11:59')) ||
+                    (periodo === 'Tarde' && (hi !== '12:00' || hf !== '17:00')) ||
+                    (periodo === 'Noite' && (hi !== '18:00' || hf !== '23:59')) ||
+                    (periodo === 'Bloquear' && (hi !== '00:00' || hf !== '23:59'))
+                ) {
+                    periodoSelect.value = '';
+                }
+            }
+            horaInicialInput.addEventListener('input', clearPeriodoIfCustomTime);
+            horaFinalInput.addEventListener('input', clearPeriodoIfCustomTime);
+
+            document.getElementById('btnNovo').addEventListener('click', function() {
+                document.getElementById('agendamentoId').value = '';
+                document.getElementById('dataEvento').value = '';
+                document.getElementById('descricao').value = '';
+                document.getElementById('periodo').value = '';
+                document.getElementById('horaInicial').value = '';
+                document.getElementById('horaFinal').value = '';
+                document.getElementById('btnAgendar').style.display = '';
+                document.getElementById('btnAlterar').style.display = 'none';
+            });
+
+            // Optionally, add mask for dd/MM/yyyy
+            var dataEventoInput = document.getElementById('dataEvento');
+            dataEventoInput.addEventListener('input', function(e) {
+                var v = dataEventoInput.value.replace(/\D/g, '');
+                if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
+                if (v.length >= 5) v = v.slice(0,5) + '/' + v.slice(5,9);
+                dataEventoInput.value = v;
+            });
         });
     </script>
 }
