@@ -17,6 +17,9 @@ namespace PalcoLivre.Pages.Cliente
         }
 
         [BindProperty]
+        public int Id { get; set; }
+
+        [BindProperty]
         [Required(ErrorMessage = "Nome é obrigatório.")]
         public string Nome { get; set; } = string.Empty;
 
@@ -40,16 +43,29 @@ namespace PalcoLivre.Pages.Cliente
                 return Page();
             }
 
-            var cliente = new PalcoLivre.Data.Cliente
+            if (Id > 0)
             {
-                Nome = Nome,
-                Email = Email
-            };
+                var cliente = _context.Clientes.FirstOrDefault(c => c.Id == Id);
+                if (cliente != null)
+                {
+                    cliente.Nome = Nome;
+                    cliente.Email = Email;
+                    _context.SaveChanges();
+                    TempData["ShowConfirmation"] = "true";
+                }
+            }
+            else
+            {
+                var cliente = new PalcoLivre.Data.Cliente
+                {
+                    Nome = Nome,
+                    Email = Email
+                };
+                _context.Clientes.Add(cliente);
+                _context.SaveChanges();
+                TempData["ShowConfirmation"] = "true";
+            }
 
-            _context.Clientes.Add(cliente);
-            _context.SaveChanges();
-
-            TempData["ShowConfirmation"] = "true";
             return RedirectToPage("/Cliente/Create");
         }
     }

@@ -17,6 +17,9 @@ namespace PalcoLivre.Pages.Cantor
         }
 
         [BindProperty]
+        public int Id { get; set; }
+
+        [BindProperty]
         [Required(ErrorMessage = "Nome é obrigatório.")]
         public string Nome { get; set; } = string.Empty;
 
@@ -40,16 +43,29 @@ namespace PalcoLivre.Pages.Cantor
                 return Page();
             }
 
-            var cantor = new PalcoLivre.Data.Cantor
+            if (Id > 0)
             {
-                Nome = Nome,
-                Telefone = Telefone
-            };
+                var cantor = _context.Cantores.FirstOrDefault(c => c.Id == Id);
+                if (cantor != null)
+                {
+                    cantor.Nome = Nome;
+                    cantor.Telefone = Telefone;
+                    _context.SaveChanges();
+                    TempData["ShowConfirmation"] = "true";
+                }
+            }
+            else
+            {
+                var cantor = new PalcoLivre.Data.Cantor
+                {
+                    Nome = Nome,
+                    Telefone = Telefone
+                };
+                _context.Cantores.Add(cantor);
+                _context.SaveChanges();
+                TempData["ShowConfirmation"] = "true";
+            }
 
-            _context.Cantores.Add(cantor);
-            _context.SaveChanges();
-
-            TempData["ShowConfirmation"] = "true";
             return RedirectToPage("/Cantor/Create");
         }
     }
