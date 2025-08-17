@@ -7,10 +7,10 @@ namespace PalcoLivre.Data
         public int Id { get; set; }
 
         [Required]
-        public string Nome { get; set; }
+        public required string Nome { get; set; }
 
         [Required]
         [Phone]
-        public string Telefone { get; set; }
+        public required string Telefone { get; set; }
     }
 }

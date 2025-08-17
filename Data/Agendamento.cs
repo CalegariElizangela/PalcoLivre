@@ -15,5 +15,13 @@ namespace PalcoLivre.Data
 
         [Required]
         public string Descricao { get; set; } = string.Empty;
+
+        [Required]
+        [DataType(DataType.Time)]
+        public TimeSpan HoraInicial { get; set; }
+
+        [Required]
+        [DataType(DataType.Time)]
+        public TimeSpan HoraFinal { get; set; }
     }
 }

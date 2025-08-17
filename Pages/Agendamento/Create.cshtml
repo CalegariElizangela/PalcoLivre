@@ -2,34 +2,87 @@
 @model PalcoLivre.Pages.Agendamento.CreateModel
 @{
     ViewData["Title"] = "Agendamento";
+    var eventosJson = System.Text.Json.JsonSerializer.Serialize(Model.EventosMes.Select(e => new {
+        title = e.Descricao + " (" + e.Periodo + ")",
+        start = e.DataEvento.ToString("yyyy-MM-dd") + "T" + e.HoraInicial.ToString(@"hh\:mm"),
+        end = e.DataEvento.ToString("yyyy-MM-dd") + "T" + e.HoraFinal.ToString(@"hh\:mm"),
+        color = e.Periodo == "Manhã" ? "#4dd0e1" : e.Periodo == "Tarde" ? "#1976d2" : "#7e57c2",
+        extendedProps = new { periodo = e.Periodo }
+    }));
 }
 
 <h2>Agendamento de Evento</h2>
 
-<form method="post" id="agendamentoForm">
-    <div class="mb-3">
-        <label for="dataEvento" class="form-label">Data do Evento</label>
-        <input type="date" class="form-control" id="dataEvento" name="DataEvento" asp-for="DataEvento" />
-        <span asp-validation-for="DataEvento" class="text-danger"></span>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form method="post" id="agendamentoForm">
+            <div class="mb-3">
+                <label for="dataEvento" class="form-label">Data do Evento</label>
+                <input type="date" class="form-control" id="dataEvento" name="DataEvento" asp-for="DataEvento" />
+                <span asp-validation-for="DataEvento" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="horaInicial" class="form-label">Hora Inicial</label>
+                <input type="time" class="form-control" id="horaInicial" name="HoraInicial" asp-for="HoraInicial" />
+                <span asp-validation-for="HoraInicial" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="horaFinal" class="form-label">Hora Final</label>
+                <input type="time" class="form-control" id="horaFinal" name="HoraFinal" asp-for="HoraFinal" />
+                <span asp-validation-for="HoraFinal" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="periodo" class="form-label">Período</label>
+                <select class="form-control" id="periodo" name="Periodo" asp-for="Periodo">
+                    <option value="">Selecione</option>
+                    <option value="Manhã">Manhã</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Noite">Noite</option>
+                </select>
+                <span asp-validation-for="Periodo" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição do Evento</label>
+                <input type="text" class="form-control" id="descricao" name="Descricao" asp-for="Descricao" />
+                <span asp-validation-for="Descricao" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Agendar</button>
+        </form>
     </div>
-    <div class="mb-3">
-        <label for="periodo" class="form-label">Período</label>
-        <select class="form-control" id="periodo" name="Periodo" asp-for="Periodo">
-            <option value="">Selecione</option>
-            <option value="Manhã">Manhã</option>
-            <option value="Tarde">Tarde</option>
-            <option value="Noite">Noite</option>
-        </select>
-        <span asp-validation-for="Periodo" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label for="descricao" class="form-label">Descrição do Evento</label>
-        <input type="text" class="form-control" id="descricao" name="Descricao" asp-for="Descricao" />
-        <span asp-validation-for="Descricao" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Agendar</button>
-</form>
+</div>
+
+<hr />
+<h3>Calendário de Eventos</h3>
+<div id="calendar"></div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/js/all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var eventos = @Html.Raw(eventosJson);
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 600,
+                events: eventos,
+                eventContent: function(arg) {
+                    // Add star icon to event
+                    return {
+                        html: `<span style='color:gold;'><i class='fas fa-star'></i></span> ` + arg.event.title
+                    };
+                },
+                eventColor: '#1976d2',
+                eventDisplay: 'block',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                }
+            });
+            calendar.render();
+        });
+    </script>
 }
