@@ -1,0 +1,35 @@
+@page
+@model PalcoLivre.Pages.Agendamento.CreateModel
+@{
+    ViewData["Title"] = "Agendamento";
+}
+
+<h2>Agendamento de Evento</h2>
+
+<form method="post" id="agendamentoForm">
+    <div class="mb-3">
+        <label for="dataEvento" class="form-label">Data do Evento</label>
+        <input type="date" class="form-control" id="dataEvento" name="DataEvento" asp-for="DataEvento" />
+        <span asp-validation-for="DataEvento" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label for="periodo" class="form-label">Período</label>
+        <select class="form-control" id="periodo" name="Periodo" asp-for="Periodo">
+            <option value="">Selecione</option>
+            <option value="Manhã">Manhã</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noite">Noite</option>
+        </select>
+        <span asp-validation-for="Periodo" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label for="descricao" class="form-label">Descrição do Evento</label>
+        <input type="text" class="form-control" id="descricao" name="Descricao" asp-for="Descricao" />
+        <span asp-validation-for="Descricao" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Agendar</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

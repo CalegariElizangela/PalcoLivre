@@ -11,5 +11,6 @@ namespace PalcoLivre.Data
 
         public DbSet<Cantor> Cantores { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Agendamento> Agendamentos { get; set; }
     }
 }
